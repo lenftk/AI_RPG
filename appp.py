@@ -3,6 +3,7 @@ from groq import Groq
 import os
 import time
 from dotenv import load_dotenv
+import streamlit.components.v1 as components
 
 load_dotenv()
 
@@ -176,7 +177,7 @@ if submitted:
             with ad_placeholder.container():
                 st.markdown(f"""<h3 style="text-align:center; color:#ffd700;">⏳ 분석 중... ({i}초)</h3>""", unsafe_allow_html=True)
                 
-                components.html(kakao_ad_code, height=270)
+                components.html(kakao_ad_code, height=120)
                 
                 st.progress((3-i+1) * 33)
             time.sleep(1)
