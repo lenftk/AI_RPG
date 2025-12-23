@@ -5,8 +5,10 @@ import time
 from dotenv import load_dotenv
 import streamlit.components.v1 as components
 
+# 환경변수 로드
 load_dotenv()
 
+# --- 1. 페이지 설정 ---
 st.set_page_config(
     page_title="현생 RPG 상태창",
     layout="centered",
@@ -15,13 +17,16 @@ st.set_page_config(
 
 st.markdown("""
 <style>
+    /* 폰트 임포트 */
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
 
+    /* 헤더 숨기기 */
     header {visibility: hidden;}
     .stDeployButton {display:none;}
     footer {visibility: hidden;}
     #MainMenu {visibility: hidden;}
 
+    /* 전체 배경 */
     .stApp {
         background-color: #050510;
         background-image: 
@@ -29,19 +34,21 @@ st.markdown("""
             linear-gradient(90deg, rgba(0, 255, 255, 0.05) 1px, transparent 1px);
         background-size: 50px 50px;
         font-family: 'Orbitron', sans-serif;
-        color: #e0e0e0; 
+        color: #e0e0e0; /* 기본 글씨 색상 밝게 */
     }
 
+    /* 💡 [핵심] 입력창 라벨(제목) 밝게 만들기 */
     .stTextInput label, .stTextArea label {
-        color: #ffffff !important; 
+        color: #ffffff !important; /* 완전 흰색 */
         font-weight: bold;
-        text-shadow: 0 0 5px rgba(0, 243, 255, 0.5); 
+        text-shadow: 0 0 5px rgba(0, 243, 255, 0.5); /* 살짝 네온 효과 */
         font-size: 14px;
     }
 
+    /* 입력창 내부 스타일 */
     .stTextInput>div>div>input, .stTextArea>div>div>textarea {
-        background-color: #0f0f1a; 
-        color: #00f3ff; 
+        background-color: #0f0f1a; /* 아주 어두운 남색 */
+        color: #00f3ff; /* 입력 글씨는 형광 청록 */
         border: 1px solid #58a6ff;
         border-radius: 5px;
         font-family: 'Orbitron', sans-serif;
@@ -51,6 +58,7 @@ st.markdown("""
         box-shadow: 0 0 10px #ff00de;
     }
 
+    /* 버튼 스타일 */
     .stButton>button {
         width: 100%;
         background: black;
@@ -72,6 +80,7 @@ st.markdown("""
         box-shadow: 0 0 30px #ff00de;
     }
 
+    /* 광고 박스 */
     .ad-box {
         background: #111;
         border: 2px dashed #ffd700;
@@ -84,8 +93,9 @@ st.markdown("""
     }
     @keyframes blink { 50% { border-color: #555; } }
 
+    /* 📸 결과 카드 스타일 */
     .status-window {
-        background: rgba(15, 20, 35, 0.95); 
+        background: rgba(15, 20, 35, 0.95); /* 배경색 조금 더 밝게 조정 */
         border: 2px solid #00f3ff;
         padding: 25px;
         margin-top: 20px;
@@ -96,7 +106,7 @@ st.markdown("""
     .scanline {
         position: absolute;
         top: 0; left: 0; right: 0; bottom: 0;
-        background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1)); 
+        background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1)); /* 스캔라인 투명도 낮춤 (가독성 위해) */
         background-size: 100% 4px;
         pointer-events: none;
         z-index: 10;
@@ -116,8 +126,9 @@ st.markdown("""
     .skill-box { border: 1px solid #00f3ff; background: rgba(0, 243, 255, 0.05); padding: 15px; margin-top: 25px; position: relative; }
     .skill-label { position: absolute; top: -10px; left: 10px; background: #050510; padding: 0 10px; color: #00f3ff; font-size: 12px; font-weight: bold; }
     
+    /* 설명 텍스트 밝게 수정 */
     .desc-text { 
-        color: #e0e0e0; 
+        color: #e0e0e0; /* 밝은 회색으로 변경 */
         font-size: 14px; 
         line-height: 1.6; 
         margin-top: 20px; 
@@ -127,8 +138,8 @@ st.markdown("""
     }
     
     ::placeholder {
-        color: #aaaaaa !important; 
-        opacity: 1; 
+        color: #aaaaaa !important; /* 밝은 회색으로 설정 */
+        opacity: 1; /* 투명도 제거 (선명하게) */
         font-weight: normal;
     }        
 
@@ -136,6 +147,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# --- 3. API 설정 ---
 api_key = os.environ.get("GROQ_API_KEY") 
 if not api_key:
     st.error("⚠️ .env 파일 설정을 확인해주세요.")
@@ -143,7 +155,9 @@ if not api_key:
 
 client = Groq(api_key=api_key)
 
+# --- 4. 메인 화면 ---
 st.title("현생 RPG 상태창")
+# 안내 문구 밝게 변경 (#888 -> #ccc)
 st.markdown("<div style='color:#ccc; margin-bottom:20px; text-shadow:0 0 5px #00f3ff;'>SYSTEM: 플레이어 스캔 준비 완료...</div>", unsafe_allow_html=True)
 
 with st.form("game_form"):
@@ -159,6 +173,7 @@ with st.form("game_form"):
     st.write("")
     submitted = st.form_submit_button("INITIALIZE (시작)")
 
+# --- 5. 결과 처리 ---
 if submitted:
     if not name:
         st.warning("ERROR: 닉네임이 입력되지 않았습니다.")
@@ -167,7 +182,37 @@ if submitted:
         
         kakao_ad_code = """
         <ins class="kakao_ad_area" style="display:none;"
-        data-ad-unit =기         data-ad-unit =                 닉네임:{name}, MBTI:{mbti}, 취미:{hobby}, 고민:{worry}
+        data-ad-unit = "DAN-63IqT0DCNLlQO9nB"
+        data-ad-width = "320"
+        data-ad-height = "100"></ins>
+        <script type="text/javascript" src="//t1.daumcdn.net/kas/static/ba.min.js" async></script>
+        """
+
+        for i in range(3, 0, -1):
+            with ad_placeholder.container():
+                st.markdown(f"""<h3 style="text-align:center; color:#ffd700;">⏳ 분석 중... ({i}초)</h3>""", unsafe_allow_html=True)
+                
+                components.html(kakao_ad_code, height=120)
+                
+                st.progress((3-i+1) * 33)
+            time.sleep(1)
+            
+        ad_placeholder.empty()
+
+        with st.spinner("FINALIZING..."):
+            try:
+                prompt = f"""
+                너는 사이버펑크 RPG 게임의 AI 운영자야.
+                
+                [규칙]
+                1. 결과는 무조건 아래 키워드로 시작하는 텍스트로 줘.
+                2. 따옴표(')나 콤마(,) 넣지 마.
+                3. 말투: 시니컬하고 기계적인 톤.
+                4. 한자 절대 사용금지.
+                5. 나이 절대 언급 금지.
+
+                [입력]
+                닉네임:{name}, MBTI:{mbti}, 취미:{hobby}, 고민:{worry}
 
                 [출력 형식]
                 직업: (웃긴 미래지향적 직업명)
